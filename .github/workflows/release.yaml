@@ -2,8 +2,7 @@ name: release
 
 on:
   push:
-    tags: "*"
-    branches: master
+    branches: test/test-release-workflow
 
 jobs:
   version-match:
@@ -12,6 +11,13 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install yq
         run: sudo snap install yq
+
+      - name: Print Tags
+        run: |
+          echo $GITHUB_REF
+          echo $(echo $GITHUB_REF | sed s+refs/tags/++)
+          echo $(yq r helm/values.yaml 'deployment.image' | cut -d ':' -f2)
+
       - name: Ensure version equality
         run: |
           if [[ "$(echo $GITHUB_REF | sed s+refs/tags/++)" == "" ]] \
