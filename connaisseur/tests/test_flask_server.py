@@ -117,7 +117,8 @@ def test_readyz(
     "name",
     [("ad_request_deployments"), ("ad_request_pods"), ("ad_request_replicasets")],
 )
-def test_mutate_no_verify(mock_mutate, mock_policy_no_verify, name):
+def test_mutate_no_verify(monkeypatch, mock_mutate, mock_policy_no_verify, name):
+    monkeypatch.setenv("ALERT_CONFIG_DIR", "tests/data/alerting")
     client = fs.APP.test_client()
 
     mock_request_data = get_file_json(f"tests/data/{name}.json")
@@ -143,8 +144,11 @@ def test_mutate_no_verify(mock_mutate, mock_policy_no_verify, name):
         ),
     ],
 )
-def test_mutate_invalid(monkeypatch, name, api_version, allowed, code, message):
+def test_mutate_invalid(
+    monkeypatch, mock_policy_verify, name, api_version, allowed, code, message
+):
     monkeypatch.setenv("DETECTION_MODE", "0")
+    monkeypatch.setenv("ALERT_CONFIG_DIR", "tests/data/alerting")
     client = fs.APP.test_client()
 
     mock_request_data = get_file_json(f"tests/data/{name}.json")
@@ -204,6 +208,7 @@ def test_mutate_verify(
     monkeypatch,
 ):
     monkeypatch.setenv("DETECTION_MODE", detection)
+    monkeypatch.setenv("ALERT_CONFIG_DIR", "tests/data/alerting")
     client = fs.APP.test_client()
 
     mock_request_data = get_file_json(f"tests/data/{name}.json")

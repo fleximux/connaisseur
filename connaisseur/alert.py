@@ -61,8 +61,10 @@ class Alert:
                 connaisseur_pod_id=os.getenv("POD_NAME"),
                 cluster=load_config()["cluster_name"],
                 timestamp=datetime.now(),
-                request_id=self.admission_request["request"]["uid"],
-                images=str(get_images(self.admission_request)),
+                request_id=self.admission_request.get("request", {}).get(
+                    "uid", "No given UID"
+                ),
+                images=(str(get_images(self.admission_request)) or "No given images"),
             )
         return payload
 
@@ -71,6 +73,8 @@ class Alert:
         if not any(
             [
                 policy.get_matching_rule(Image(image)).get("verify", True)
+                if image
+                else True
                 for image in get_images(self.admission_request)
             ]
         ):
@@ -102,8 +106,10 @@ def load_config():
 
 
 def get_images(admission_request):
-    relevant_spec = get_container_specs(admission_request["request"]["object"])
-    images = [container["image"] for container in relevant_spec]
+    relevant_spec = get_container_specs(
+        admission_request.get("request", {}).get("object", {})
+    )
+    images = [container.get("image") for container in relevant_spec]
     return images
 
 
