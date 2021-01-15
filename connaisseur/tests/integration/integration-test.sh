@@ -4,9 +4,9 @@ set -euo pipefail
 # This script is expected to be called from the root folder of Connaisseur
 
 echo 'Preparing Connaisseur config...'
-export RELEASE_IMAGE=$(yq r helm/values.yaml 'deployment.image')
+export RELEASE_IMAGE=$(yq e '.deployment.image' helm/values.yaml)
 envsubst < connaisseur/tests/integration/update-config.yaml > update
-yq write --inplace --script update helm/values.yaml # Coincidentally, this also ensure all used env variables are set
+yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' helm/values.yaml update
 rm update
 echo 'Config set'
 
