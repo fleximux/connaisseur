@@ -1,7 +1,7 @@
 # configure connaisseur deployment
 deployment:
   replicasCount: 3
-  image: securesystemsengineering/connaisseur:v1.4.4
+  image: securesystemsengineering/connaisseur:v1.2.0
   helmHookImage: securesystemsengineering/connaisseur:helm-hook-v1.0
   imagePullPolicy: Always
   resources: {}
@@ -24,13 +24,31 @@ service:
 notary:
   # domain to the notary server. can be `null` or non-existant to use
   # the public Docker Hub notary server
-  host: notary.docker.io
+  host: 10.1.0.17:4443
   # only for insecure notary instances with selfsigned certificates.
-  selfsigned: false
-  # selfsignedCert: |
-  #   -----BEGIN CERTIFICATE-----
-  #   -----END CERTIFICATE-----
-
+  selfsigned: true
+  selfsignedCert: |
+     -----BEGIN CERTIFICATE-----
+     MIIDaTCCAlGgAwIBAgIJAP2Lj9pdis/6MA0GCSqGSIb3DQEBCwUAMEsxCzAJBgNV
+     BAYTAkVTMRIwEAYDVQQIDAlNeUNvbXBhbnkxDzANBgNVBAcMBk1hZHJpZDEXMBUG
+     A1UECgwOTXlPcmdhbml6YXRpb24wHhcNMjAxMDE5MDc1NzMwWhcNMjMxMDE5MDc1
+     NzMwWjBLMQswCQYDVQQGEwJFUzESMBAGA1UECAwJTXlDb21wYW55MQ8wDQYDVQQH
+     DAZNYWRyaWQxFzAVBgNVBAoMDk15T3JnYW5pemF0aW9uMIIBIjANBgkqhkiG9w0B
+     AQEFAAOCAQ8AMIIBCgKCAQEAovzAFWH3SVXAcsz3aI9R2WO8LuNl7CE28CGZxkAV
+     uzwwZlRmt/GneBpOikFjRb5K5wRX7E1rQX7PNaX5g1H6LxdFT9mxy83IwmX+foeq
+     E99evFwQ9qKefrCHzAFH6v7zs2WUJOVvqMr5RM8VcUwqm7IBOQJY8y/wdFyrcFI3
+     68ldKYQiZ0CakJbRxBL5lWO9rhW7D0q1vHQ5cE8g4YTAZeA0vAb/+vbMZjZhvgyS
+     uQ5x1gnwvQ++LcK1sEF1JYyet1jxIvznX/tlLa1HItwzesziZFSQCFjcUQTvUzEo
+     0vRx6aX7KllZkv+ze7eWFHtYGhFyLc2ZKp7c7ffyAGwKwQIDAQABo1AwTjAdBgNV
+     HQ4EFgQUJRM4oaBoC+csDzVkK2B76wFjwwEwHwYDVR0jBBgwFoAUJRM4oaBoC+cs
+     DzVkK2B76wFjwwEwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAk8da
+     XuFP2co0cIfGKG/7sGr3fyUIdzi8PTzD6X6bAanNDBpxrrIpM/0ovrdtfOFgBuJD
+     oL2/pmTH4ngrP36fdxR1T4a2Brg4uG6gXFA7P37AqlZ32liM8tmTUxXT1y5v51yd
+     3Ak+S8l2TtEWHqBCsO1yv4wKTh1zhYgCML554PnUBj9yQGk7E/Gv0G9x6UqBQRV+
+     UMEn+nj1eI+7LXA1ZUy6Ze5+jOjm2O3E7GNWWHJrEqFoRxrcegA12KvS4oX087Cf
+     LOQLbnAAwNZ6ECo4c1nGff6tblqhPtF2/NFjaECwJ5671Fzn/K8gWabodRIJSO9N
+     ahY78/M2Dw9jDqcWqQ==
+     -----END CERTIFICATE-----
   # if notary uses an authentication server, give a user and password
   # with pull rights
   # The default we use is the notary instance from docker.io which is
@@ -47,6 +65,8 @@ notary:
   # the public part of the root key, for verifying notary's signatures
   rootPubKey: |
     -----BEGIN PUBLIC KEY-----
+    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBLsdw7K9uWJFn9tv+isIKgBtuPG5
+    2VzkuLWrBXcL5eq0WZir/mE9VbHSfhXd9dWrZO1VJ7H2f4y6dx4irLGm5g==
     -----END PUBLIC KEY-----
   # if you use Azure Container Registry (ACR) for your notary
   # changes some behaviour, such as health probes and how to retrieve auth tokens
@@ -57,15 +77,17 @@ notary:
 # verified. more detail in the git repo README.md
 policy:
   - pattern: "*:*"
-    verify: true
+    verify: false
   - pattern: "k8s.gcr.io/*:*"
     verify: false
   - pattern: "docker.io/securesystemsengineering/connaisseur:*"
     verify: false
+  - pattern: "10.1.0.17:14443/onesait-banking/*:*"
+    verify: true
 
 # in detection mode, deployment will not be denied, but only prompted
 # and logged. This allows testing the functionality without
 # interrupting operation.
 detection_mode: false
 
-# debug: true
+debug: true

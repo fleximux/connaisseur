@@ -1,6 +1,8 @@
 NAMESPACE = connaisseur
-IMAGE := $(shell yq r helm/values.yaml 'deployment.image')
-HELM_HOOK_IMAGE := $(shell yq r helm/values.yaml 'deployment.helmHookImage')
+IMAGE = $(IMAGE_NAME):$(TAG)
+IMAGE_NAME = securesystemsengineering/connaisseur
+TAG = v1.2.0
+HELM_HOOK_IMAGE := securesystemsengineering/connaisseur:helm-hook-v1.0
 
 .PHONY: all docker certs install unistall upgrade annihilate
 
@@ -23,7 +25,7 @@ install: certs
 	#
 	#=============================================
 	#
-	helm install connaisseur helm --atomic
+	helm install connaisseur helm --wait --debug
 
 uninstall:
 	kubectl config set-context --current --namespace $(NAMESPACE)
@@ -32,7 +34,7 @@ uninstall:
 
 upgrade:
 	kubectl config set-context --current --namespace $(NAMESPACE)
-	helm upgrade connaisseur helm --wait
+	helm upgrade connaisseur helm --wait --debug
 
 annihilate:
 	kubectl delete all,mutatingwebhookconfigurations,clusterroles,clusterrolebindings,configmaps,imagepolicies -lapp.kubernetes.io/instance=connaisseur
